@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Access Terminal</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  background: radial-gradient(ellipse at top, #002b15, #000);
+  font-family: 'Share Tech Mono', monospace;
+  color: #00ff66;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Grid Background */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,102,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,102,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Binary Rain Canvas */
+canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* Terminal */
+.container {
+  width: 420px;
+  padding: 35px;
+  background: rgba(0,10,5,0.95);
+  border: 2px solid #00cc66;
+  box-shadow: 0 0 30px rgba(0,255,102,0.5);
+  z-index: 2;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  letter-spacing: 4px;
+  text-shadow: 0 0 10px rgba(0,255,102,0.6);
+}
+
+/* Input */
+label {
+  font-size: 13px;
+  color: #66ffaa;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  background: black;
+  border: 1px solid #00ff66;
+  color: #00ff66;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  background: #001f10;
+  color: #00ff66;
+  border: 1px solid #00ff66;
+  cursor: pointer;
+  letter-spacing: 2px;
+}
+
+button:hover {
+  background: #00ff66;
+  color: black;
+}
+
+/* Message */
+#message {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+  min-height: 20px;
+}
+
+/* Tasks */
+.tasks {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.tasks button {
+  width: 50%;
+  padding: 10px;
+  font-size: 13px;
+}
+
+/* Instructions */
+.instructions {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #66ffaa;
+  padding: 10px;
+  border: 1px solid #003319;
+  background: rgba(0,20,10,0.3);
+}
+</style>
+</head>
+
+<body>
+
+<div class="grid-bg"></div>
+<canvas id="binary"></canvas>
+
+<div class="container">
+  <h2>ACCESS TERMINAL</h2>
+
+  <label>ACCESS CODE</label>
+  <input type="password" id="password" placeholder="ENTER PASSWORD">
+
+  <button onclick="checkPassword()">SUBMIT</button>
+
+  <div id="message"></div>
+
+  <div class="instructions">
+    <strong>INSTRUCTIONS:</strong><br>
+    Complete <strong>Task 1</strong> and <strong>Task 2</strong> to obtain the full 4‑digit password.
+  </div>
+
+  <div class="tasks">
+    <button onclick="goTask1()">TASK 1</button>
+    <button onclick="goTask2()">TASK 2</button>
+  </div>
+</div>
+
+<script>
+/* ========= PASSWORD LOGIC ========= */
+const correctPassword = "6384";
+
+function checkPassword() {
+  const input = document.getElementById("password");
+  const message = document.getElementById("message");
+
+  if (input.value === correctPassword) {
+    message.style.color = "#00ff66";
+    message.textContent = "ACCESS GRANTED";
+    setTimeout(() => {
+      window.location.href = "nextpage.html";
+    }, 1000);
+  } else {
+    message.style.color = "#ff6666";
+    message.textContent = "ACCESS DENIED";
+    input.value = "";
+    input.focus();
+  }
+}
+
+function goTask1() {
+  window.location.href = "task1.html";
+}
+
+function goTask2() {
+  window.location.href = "task2.html";
+}
+
+/* ========= SIMPLE BINARY RAIN ========= */
+const canvas = document.getElementById("binary");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const fontSize = 16;
+const columns = Math.floor(canvas.width / fontSize);
+const drops = Array(columns).fill(1);
+const chars = ["0", "1"];
+
+function drawBinaryRain() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#00ff66";
+  ctx.font = fontSize + "px 'Share Tech Mono'";
+
+  for (let i = 0; i < drops.length; i++) {
+    const text = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.97) {
+      drops[i] = 0;
+    }
+    drops[i]++;
+  }
+}
+
+setInterval(drawBinaryRain, 40);
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
