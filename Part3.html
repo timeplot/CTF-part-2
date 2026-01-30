@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Part 3-CTF: Binary Reconstruction Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    height:100vh;
+    background: radial-gradient(ellipse at top, #002b15, #000);
+    font-family:'Share Tech Mono', monospace;
+    color:#0f0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    position: relative;
+}
+.grid-bg{
+    position:fixed;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(0,255,102,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,102,0.05) 1px, transparent 1px);
+    background-size:40px 40px;
+}
+.container{
+    position:relative;
+    z-index:1;
+    background: rgba(0,10,5,0.95);
+    padding:35px;
+    border:2px solid #0f0;
+    box-shadow:0 0 40px #0f0;
+    width:900px;
+    max-height:95vh;
+    overflow-y:auto;
+}
+h2{
+    text-align:center;
+    margin-bottom:20px;
+    letter-spacing:3px;
+    text-shadow:0 0 10px #0f0;
+}
+
+.instructions{
+    border:1px solid #0f0;
+    padding:15px;
+    margin-bottom:25px;
+    background:rgba(0,20,10,0.6);
+    font-size:14px;
+    line-height:1.6;
+}
+
+.bitmaps-container{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.bitmap-group{
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.bitmap-group h4{
+    margin-bottom:8px;
+    color:#0f0;
+    font-size:12px;
+    opacity:0.8;
+}
+
+canvas{
+    background:black;
+    border:1px solid #0f0;
+    box-shadow:0 0 15px rgba(0,255,0,0.3);
+}
+
+input{
+    width:100%;
+    padding:12px;
+    background:black;
+    color:#0f0;
+    border:2px solid #0f0;
+    text-align:center;
+    font-family:inherit;
+    font-size:16px;
+    margin-bottom:15px;
+}
+
+button{
+    margin:10px;
+    padding:12px 30px;
+    background:black;
+    color:#0f0;
+    border:2px solid #0f0;
+    cursor:pointer;
+    font-family:inherit;
+    font-size:14px;
+    transition:all 0.3s;
+}
+button:hover{
+    background:#0f0;
+    color:black;
+    box-shadow:0 0 20px #0f0;
+}
+
+.result{
+    text-align:center;
+    margin-top:15px;
+    min-height:30px;
+    padding:10px;
+    border:1px solid #0f0;
+    background:rgba(0,20,10,0.3);
+}
+
+.scanner {
+    position: fixed;
+    top: -4px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, rgba(0,255,0,0), rgba(0,255,0,0.7), rgba(0,255,0,0));
+    box-shadow: 0 0 20px rgba(0,255,0,0.7);
+    animation: scan 3s linear infinite;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+@keyframes scan {
+    0% { top: -4px; }
+    100% { top: 100%; }
+}
+
+.hint{
+    font-size:12px;
+    color:#0a0;
+    text-align:center;
+    margin-top:10px;
+    opacity:0.7;
+}
+
+.legend{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    margin-bottom:15px;
+    font-size:12px;
+}
+
+.legend-item{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+.legend-color{
+    width:15px;
+    height:15px;
+}
+</style>
+</head>
+
+<body>
+<div class="grid-bg"></div>
+<div class="scanner"></div>
+
+<div class="container">
+    <h2>Part 3-CTF: Binary Reconstruction Challenge</h2>
+
+    <div class="instructions">
+        Forensic Analysis Required:<br><br>
+        
+        Multiple memory fragments containing bitmap data have been recovered from a corrupted storage device.<br>
+        Each fragment represents an 8x8 binary matrix where active pixels (1) form ASCII character patterns.<br>
+        Some fragments contain noise (random bits) that must be filtered out during analysis.<br>
+        The final key is constructed by extracting valid characters from each bitmap in sequence.<br>
+        Analyze pixel patterns vertically from top to bottom, left to right columns.<br>
+        Combine extracted characters in the order of bitmap groups: Primary → Secondary → Tertiary.<br>
+        Ignore null bytes (00000000) and noise patterns that don't form valid ASCII characters.
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background:#0f0;"></div>
+            <span>Active Bit (1)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background:#000;"></div>
+            <span>Inactive Bit (0)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background:#f00;"></div>
+            <span>Noise Pattern</span>
+        </div>
+    </div>
+
+    <div class="bitmaps-container">
+        <div class="bitmap-group">
+            <h4>Primary Fragments (Group A)</h4>
+            <canvas id="bmp0" width="160" height="160"></canvas>
+            <canvas id="bmp1" width="160" height="160"></canvas>
+            <canvas id="bmp2" width="160" height="160"></canvas>
+        </div>
+        
+        <div class="bitmap-group">
+            <h4>Secondary Fragments (Group B)</h4>
+            <canvas id="bmp3" width="160" height="160"></canvas>
+            <canvas id="bmp4" width="160" height="160"></canvas>
+            <canvas id="bmp5" width="160" height="160"></canvas>
+        </div>
+        
+        <div class="bitmap-group">
+            <h4>Tertiary Fragments (Group C)</h4>
+            <canvas id="bmp6" width="160" height="160"></canvas>
+            <canvas id="bmp7" width="160" height="160"></canvas>
+            <canvas id="bmp8" width="160" height="160"></canvas>
+        </div>
+    </div>
+
+    <div class="hint">
+        HINT: Read columns vertically, convert binary to ASCII, ignore non-character patterns
+    </div>
+
+    <input id="finalInput" placeholder="Enter assembled 12-character key (UPPERCASE only)">
+
+    <div style="text-align:center">
+        <button onclick="check()">VALIDATE KEY</button>
+        <button onclick="showHint()">SHOW HINT</button>
+        <button onclick="resetAll()">RESET</button>
+    </div>
+
+    <div class="result" id="result">Awaiting binary reconstruction…</div>
+</div>
+
+<script>
+const BITMAPS = [
+    [
+        "01010011", "01000101", "01000011", "01010010", "01000101", "01010100", "00000000", "00000000"
+    ],
+    [
+        "01010101", "01010010", "01000101", "01000011", "00000000", "00000000", "00000000", "00000000"
+    ],
+    [
+        "00110000", "00111001", "00110001", "00000000", "00000000", "00000000", "00000000", "00000000"
+    ],
+    [
+        "01001110", "01000100", "01001111", "01001101", "00000000", "00000000", "00000000", "00000000"
+    ],
+    [
+        "00110101", "00110110", "00110011", "00110100", "00000000", "00000000", "00000000", "00000000"
+    ],
+    [
+        "01011001", "01010011", "01010100", "01000101", "00000000", "00000000", "00000000", "00000000"
+    ],
+    [
+        "00111000", "00110100", "00110111", "00110010", "00000000", "00000000", "00000000", "00000000"
+    ],
+    [
+        "01000001", "01000010", "01000011", "01000100", "00000000", "00000000", "00000000", "00000000"
+    ],
+    [
+        "00110001", "00110010", "00110011", "00110100", "00000000", "00000000", "00000000", "00000000"
+    ]
+];
+
+const NOISE_PATTERNS = [
+    ["10101010", "01010101", "10101010", "01010101", "10101010", "01010101", "10101010", "01010101"],
+    ["11110000", "00001111", "11110000", "00001111", "11110000", "00001111", "11110000", "00001111"],
+    ["11001100", "00110011", "11001100", "00110011", "11001100", "00110011", "11001100", "00110011"]
+];
+
+const ANSWER = "SECURECRYPTO8472";
+
+function generateComplexBitmap(baseIndex, hasNoise){
+    const base = BITMAPS[baseIndex];
+    const bitmap = [];
+    
+    for(let y = 0; y < 8; y++){
+        let row = "";
+        const baseRow = base[y] || "00000000";
+        
+        for(let x = 0; x < 8; x++){
+            if(hasNoise && Math.random() > 0.7){
+                row += Math.random() > 0.5 ? "1" : "0";
+            } else {
+                row += baseRow[x] || "0";
+            }
+        }
+        
+        bitmap.push(row);
+    }
+    
+    return bitmap;
+}
+
+function draw(canvasId, bitmap, isNoise = false){
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    const size = 20;
+    
+    ctx.clearRect(0, 0, 160, 160);
+    
+    for(let y = 0; y < 8; y++){
+        for(let x = 0; x < 8; x++){
+            if(isNoise){
+                ctx.fillStyle = "#f00";
+            } else {
+                ctx.fillStyle = bitmap[y][x] === "1" ? "#0f0" : "#000";
+            }
+            ctx.fillRect(x * size, y * size, size, size);
+        }
+    }
+    
+    ctx.strokeStyle = "rgba(0,255,102,0.3)";
+    ctx.lineWidth = 1;
+    
+    for(let i = 0; i <= 8; i++){
+        ctx.beginPath();
+        ctx.moveTo(i * size, 0);
+        ctx.lineTo(i * size, 160);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(0, i * size);
+        ctx.lineTo(160, i * size);
+        ctx.stroke();
+    }
+}
+
+function initializeBitmaps(){
+    draw("bmp0", generateComplexBitmap(0, false));
+    draw("bmp1", generateComplexBitmap(1, false));
+    draw("bmp2", generateComplexBitmap(2, false));
+    draw("bmp3", generateComplexBitmap(3, true));
+    draw("bmp4", generateComplexBitmap(4, true));
+    draw("bmp5", generateComplexBitmap(5, true));
+    draw("bmp6", NOISE_PATTERNS[0], true);
+    draw("bmp7", NOISE_PATTERNS[1], true);
+    draw("bmp8", generateComplexBitmap(8, false));
+}
+
+function binaryToChar(binaryStr){
+    return String.fromCharCode(parseInt(binaryStr, 2));
+}
+
+function extractFromBitmap(bitmap){
+    let result = "";
+    
+    for(let col = 0; col < 8; col++){
+        let binary = "";
+        for(let row = 0; row < 8; row++){
+            binary += bitmap[row][col];
+        }
+        
+        if(binary !== "00000000"){
+            const char = binaryToChar(binary);
+            if(char >= ' ' && char <= '~'){
+                result += char;
+            }
+        }
+    }
+    
+    return result;
+}
+
+function check(){
+    const input = document.getElementById("finalInput").value.trim().toUpperCase();
+    const resultDiv = document.getElementById("result");
+    
+    if(input === ANSWER){
+        resultDiv.innerHTML = "<span style='color:#0f0;text-shadow:0 0 10px #0f0;'>✓ ACCESS GRANTED: Valid key confirmed. Proceed to next level.</span>";
+        resultDiv.style.borderColor = "#0f0";
+        resultDiv.style.boxShadow = "0 0 15px #0f0";
+    } else if(input.length === 0){
+        resultDiv.innerHTML = "<span style='color:#ff0'>Please enter a key for validation</span>";
+        resultDiv.style.borderColor = "#ff0";
+    } else if(input.length !== ANSWER.length){
+        resultDiv.innerHTML = `<span style='color:#ff0'>Key length incorrect. Expected ${ANSWER.length} characters.</span>`;
+        resultDiv.style.borderColor = "#ff0";
+    } else {
+        resultDiv.innerHTML = "<span style='color:#f00'>✗ ACCESS DENIED: Invalid key. Analyze bitmaps more carefully.</span>";
+        resultDiv.style.borderColor = "#f00";
+        resultDiv.style.boxShadow = "0 0 15px #f00";
+    }
+}
+
+function showHint(){
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "<span style='color:#0af'>HINT: Extract characters from valid 8-bit columns (excluding noise patterns). Combine in order A1-A3, then B1-B3, then C1-C3.</span>";
+    resultDiv.style.borderColor = "#0af";
+}
+
+function resetAll(){
+    document.getElementById("finalInput").value = "";
+    document.getElementById("result").innerHTML = "Awaiting binary reconstruction…";
+    document.getElementById("result").style.borderColor = "#0f0";
+    document.getElementById("result").style.boxShadow = "none";
+    initializeBitmaps();
+}
+
+initializeBitmaps();
+
+document.getElementById("finalInput").addEventListener("keypress", function(e){
+    if(e.key === "Enter"){
+        check();
+    }
+});
+</script>
+</body>
+</html>

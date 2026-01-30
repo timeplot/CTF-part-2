@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task 2 – Algorithmic Decode</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  background: radial-gradient(ellipse at top, rgba(0, 43, 21, 1), rgba(0, 0, 0, 1));
+  font-family: 'Share Tech Mono', monospace;
+  color: rgb(0, 255, 102);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.back-button{
+    position:fixed;
+    top:20px;
+    left:20px;
+    background:rgba(0,20,10,0.9);
+    color:#00ff66;
+    border:1px solid #00ff66;
+    padding:12px 24px;
+    cursor:pointer;
+    font-family:inherit;
+    font-size:14px;
+    z-index:100;
+}
+.back-button:hover{
+    background:rgba(0,255,102,0.2);
+}
+
+.scan-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgb(0,255,102), transparent);
+  box-shadow: 0 0 15px rgb(0,255,102);
+  animation: scan 5s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,102,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,102,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.container {
+  width: 850px;
+  max-height: 90vh;
+  padding: 25px;
+  background: rgba(0, 10, 5, 0.95);
+  border: 2px solid rgb(0, 204, 102);
+  box-shadow: 0 0 50px rgba(0,255,102,0.6), inset 0 0 25px rgba(0,255,102,0.1);
+  z-index: 2;
+  border-radius: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+h2 {
+  text-align: center;
+  letter-spacing: 3px;
+  margin-bottom: 15px;
+  text-shadow: 0 0 12px rgba(0,255,102,0.7);
+}
+
+.flex-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.flex-row textarea {
+  flex: 1;
+  height: 250px;
+  background: black;
+  border: 1px solid rgb(0,255,102);
+  color: rgb(0,255,102);
+  font-family: inherit;
+  padding: 12px;
+  font-size: 14px;
+  resize: none;
+}
+
+.flex-row .instructions {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgb(102,255,170);
+  border: 1px solid rgb(0,102,51);
+  padding: 15px;
+  background: rgba(0,20,10,0.3);
+  border-radius: 4px;
+}
+
+pre {
+  background: rgba(0, 0, 0, 0.85);
+  padding: 20px;
+  border: 2px solid rgb(0,255,102);
+  margin: 15px 0;
+  color: rgb(102,255,170);
+  font-size: 14px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  background: black;
+  border: 1px solid rgb(0,255,102);
+  color: rgb(0,255,102);
+  font-family: inherit;
+  letter-spacing: 2px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,61,31,0.8));
+  color: rgb(0,255,102);
+  border: 1px solid rgb(0,255,102);
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+button:hover {
+  background: rgb(0,255,102);
+  color: black;
+  box-shadow: 0 0 20px rgb(0,255,102), 0 0 35px rgba(0,255,102,0.3);
+}
+
+.result {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 14px;
+  min-height: 25px;
+  letter-spacing: 1px;
+}
+
+.hint {
+  font-size: 12px;
+  color: rgb(102,255,170);
+  text-align: center;
+  margin-top: 5px;
+  opacity: 0.7;
+}
+
+.complexity {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 15px;
+  padding: 8px;
+  background: rgba(0,20,10,0.3);
+  border: 1px solid rgba(0,255,102,0.3);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background: rgba(0,255,102,0.2);
+  border-radius: 50%;
+}
+
+.dot.active {
+  background: #00ff66;
+  box-shadow: 0 0 8px #00ff66;
+}
+</style>
+</head>
+
+<body>
+
+<div class="grid-bg"></div>
+<div class="scan-line"></div>
+<button class="back-button" onclick="goBack()">← BACK TO MENU</button>
+
+<div class="container">
+<h2>TASK 2: PYTHON DECODE</h2>
+
+<div class="complexity">
+  <div class="dot active"></div>
+  <div class="dot active"></div>
+  <div class="dot active"></div>
+  <div class="dot active"></div>
+  <div class="dot"></div>
+</div>
+
+<div class="flex-row">
+  <textarea id="codeBox" placeholder="PASTE YOUR PYTHON DECODING CODE HERE (REQUIRED)
+
+Write a function that reverses the encryption process.
+The encoded list is provided below.
+
+Your code should:
+1. Take the encoded list
+2. Reverse each transformation step
+3. Return the original 8-digit password
+
+Example structure:
+encoded = [743, 678, 821, 734, 987, 562, 913, 845]
+
+def decode(encoded_list):
+    password = ''
+    # Your decoding logic here
+    return password
+
+print(decode(encoded))"></textarea>
+
+  <div class="instructions">
+    <strong>INSTRUCTIONS:</strong><br><br>
+    An 8-digit numeric password was encrypted using a multi-layer algorithm.<br><br>
+    You are given the encoded list and the complex encryption function.<br>
+    Reverse the algorithm using Python to recover the password.<br><br>
+    <strong>Use any Python environment:</strong><br>
+    • Replit<br>
+    • OnlineGDB<br>
+    • Python Tutor<br>
+    • PyCharm<br>
+    • VS Code<br><br>
+    <strong>Write and test your code before submitting.</strong>
+  </div>
+</div>
+
+<pre>
+# ENCODED DATA
+encoded = [743, 678, 821, 734, 987, 562, 913, 845]
+
+# COMPLEX ENCRYPTION FUNCTION
+def encrypt(password):
+    result = []
+    for i, digit in enumerate(password):
+        d = int(digit)
+        
+        # Layer 1: Base transformation
+        value = d * 13
+        value += (i + 1) * 17
+        
+        # Layer 2: Position-based conditional
+        if i % 3 == 0:
+            value ^= 0x2A
+            value += 50
+        elif i % 3 == 1:
+            value = (value * 3) % 256
+            value += 75
+        else:
+            value = ((value << 2) & 0xFF) | (value >> 6)
+            value += 100
+        
+        # Layer 3: Prime adjustment
+        primes = [2, 3, 5, 7, 11, 13, 17, 19]
+        value += primes[i] * 5
+        
+        # Layer 4: Final encoding
+        value = (value * 2) + 128
+        if value > 999:
+            value = (value % 900) + 100
+        
+        result.append(value)
+    
+    return result
+
+# YOUR TASK:
+# Write the reverse function 'decrypt(encoded)' 
+# that returns the original 8-digit password
+</pre>
+
+<input type="text" id="password" placeholder="ENTER DECODED 8-DIGIT PASSWORD" maxlength="8">
+<div class="hint">Password must be exactly 8 digits (0-9 only)</div>
+
+<button onclick="checkPassword()">SUBMIT DECRYPTION</button>
+
+<div class="result" id="result">STATUS: AWAITING INPUT</div>
+</div>
+
+<script>
+function goBack() {
+    window.location.href = "index.html";
+}
+
+const correctPassword = "68249713";
+const resultDiv = document.getElementById("result");
+
+function checkPassword() {
+  const code = document.getElementById("codeBox").value.trim();
+  const pwd = document.getElementById("password").value.trim();
+
+  if (!code) {
+    resultDiv.style.color = "rgb(255,180,0)";
+    resultDiv.textContent = "ERROR: Python code field cannot be empty.";
+    return;
+  }
+
+  if (!/^\d{8}$/.test(pwd)) {
+    resultDiv.style.color = "rgb(255,180,0)";
+    resultDiv.textContent = "ERROR: Password must be exactly 8 numeric digits.";
+    return;
+  }
+
+  if (pwd === correctPassword) {
+    resultDiv.style.color = "rgb(0,255,102)";
+    resultDiv.textContent = "✓ DECRYPTION SUCCESSFUL – PASSWORD VERIFIED: 68249713";
+    document.querySelector('.container').style.boxShadow =
+      "0 0 60px rgba(0,255,102,0.9), inset 0 0 25px rgba(0,255,102,0.2)";
+  } else {
+    resultDiv.style.color = "rgb(255,102,102)";
+    resultDiv.textContent = "ACCESS DENIED – INCORRECT PASSWORD";
+    document.getElementById("password").value = "";
+  }
+}
+
+// Auto-capitalize and filter password input
+document.getElementById("password").addEventListener('input', function() {
+  this.value = this.value.toUpperCase().replace(/[^0-9]/g, '').slice(0, 8);
+});
+</script>
+
+</body>
+</html>
