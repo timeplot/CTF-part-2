@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mission Accomplished</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  background: radial-gradient(ellipse at top, rgba(0, 43, 21, 1), rgba(0, 0, 0, 1));
+  font-family: 'Share Tech Mono', monospace;
+  color: rgb(0, 255, 102);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scan-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgb(0,255,102), transparent);
+  box-shadow: 0 0 15px rgb(0,255,102);
+  animation: scan 5s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,102,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,102,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.container {
+  width: 850px;
+  padding: 40px;
+  background: rgba(0, 10, 5, 0.95);
+  border: 2px solid rgb(0, 204, 102);
+  box-shadow: 0 0 50px rgba(0,255,102,0.6), inset 0 0 25px rgba(0,255,102,0.1);
+  z-index: 2;
+  border-radius: 4px;
+  text-align: center;
+}
+
+h1 {
+  text-align: center;
+  letter-spacing: 3px;
+  margin-bottom: 30px;
+  text-shadow: 0 0 12px rgba(0,255,102,0.7);
+  color: #00ff66;
+  font-size: 42px;
+}
+
+h2 {
+  color: #00ffaa;
+  margin-bottom: 40px;
+  font-size: 28px;
+  letter-spacing: 2px;
+}
+
+.success-message {
+  font-size: 22px;
+  line-height: 1.6;
+  color: rgb(102,255,170);
+  margin-bottom: 40px;
+  padding: 30px;
+  background: rgba(0,20,10,0.3);
+  border: 1px solid rgba(0,255,102,0.3);
+  border-radius: 4px;
+}
+
+.completion-code {
+  font-size: 32px;
+  letter-spacing: 8px;
+  color: #00ffff;
+  margin: 30px 0;
+  padding: 25px;
+  background: rgba(0,0,0,0.7);
+  border: 3px solid #00ff66;
+  font-weight: bold;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 40px 0;
+  padding: 20px;
+  background: rgba(0,20,10,0.2);
+  border: 1px solid rgba(0,255,102,0.2);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 36px;
+  color: #00ff66;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #00ffaa;
+  margin-top: 10px;
+}
+
+button {
+  margin-top: 30px;
+  padding: 18px 50px;
+  background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,61,31,0.8));
+  color: rgb(0,255,102);
+  border: 2px solid rgb(0,255,102);
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-family: inherit;
+  letter-spacing: 2px;
+}
+
+button:hover {
+  background: rgb(0,255,102);
+  color: black;
+  box-shadow: 0 0 30px rgb(0,255,102), 0 0 50px rgba(0,255,102,0.3);
+}
+
+.final-note {
+  margin-top: 40px;
+  font-size: 14px;
+  color: rgb(102,255,170);
+  opacity: 0.8;
+  border-top: 1px solid rgba(0,255,102,0.2);
+  padding-top: 20px;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.fireworks {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: #00ff66;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: explode 1s forwards;
+}
+
+@keyframes explode {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(20);
+    opacity: 0;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="scan-line"></div>
+
+<div class="container">
+  <h1 class="pulse">✓ MISSION ACCOMPLISHED</h1>
+  
+  <h2>CYBERSECURITY BREACH SUCCESSFUL</h2>
+  
+  <div class="success-message">
+    All encryption layers have been decrypted. The system has been secured.<br>
+    Your cryptographic skills have been verified at the highest level.
+  </div>
+  
+  <div class="completion-code">
+    ACCESS_CODE: CTF2024
+  </div>
+  
+  <div class="stats">
+    <div class="stat-item">
+      <div class="stat-value">4</div>
+      <div class="stat-label">CIPHER LAYERS</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">100%</div>
+      <div class="stat-label">SUCCESS RATE</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">A+</div>
+      <div class="stat-label">SECURITY RATING</div>
+    </div>
+  </div>
+  
+  <button onclick="window.location.href='index.html'">RETURN TO MAIN MENU</button>
+  
+  <div class="final-note">
+    System secured at: <span id="timestamp"></span><br>
+    Security clearance level: MAXIMUM
+  </div>
+</div>
+
+<script>
+// Set current timestamp
+document.getElementById('timestamp').textContent = new Date().toLocaleString();
+
+// Create fireworks effect
+function createFirework() {
+  const firework = document.createElement('div');
+  firework.className = 'fireworks';
+  
+  // Random position
+  const x = Math.random() * window.innerWidth;
+  const y = Math.random() * window.innerHeight;
+  
+  // Random size
+  const size = Math.random() * 8 + 4;
+  
+  // Random color
+  const colors = ['#00ff66', '#00ffaa', '#00ffff', '#00ccff'];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  
+  firework.style.left = x + 'px';
+  firework.style.top = y + 'px';
+  firework.style.width = size + 'px';
+  firework.style.height = size + 'px';
+  firework.style.background = color;
+  firework.style.boxShadow = `0 0 20px ${color}`;
+  
+  document.body.appendChild(firework);
+  
+  // Remove after animation
+  setTimeout(() => {
+    firework.remove();
+  }, 1000);
+}
+
+// Start fireworks
+setInterval(createFirework, 300);
+
+// More fireworks at the beginning
+for(let i = 0; i < 15; i++) {
+  setTimeout(createFirework, i * 100);
+}
+</script>
+
+</body>
+</html>
